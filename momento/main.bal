@@ -1,11 +1,15 @@
 import ballerina/http;
 import ballerinax/mongodb;
 
-type Movie record {
+type Item record {
     string title;
-    int year;
     string genre;
-    string director;
+    string desc;
+    string seller;
+    string thumb;
+    string img;
+    int price;
+    string location;
 };
 
 // MongoDB connection configuration
@@ -20,7 +24,7 @@ mongodb:Client mongoDb = check new (mongoConfig);
 service /movies on new http:Listener(8080) {
 
     // Resource to handle GET requests
-    resource function get .() returns Movie[]|error {
+    resource function get .() returns Item[]|error {
         // Retrieve the "momento" database and "items" collection
         mongodb:Database moviesDb = check mongoDb->getDatabase("momento");
         mongodb:Collection moviesCollection = check moviesDb->getCollection("items");
@@ -28,12 +32,12 @@ service /movies on new http:Listener(8080) {
         // Find all movies in the collection
         stream<record {| anydata...; |}, error?> movieStream = check moviesCollection->find();
 
-        Movie[] movieList = [];
+        Item[] movieList = [];
 
         // Iterate over the stream and map records to Movie type
         error? forEach = movieStream.forEach(function (record {| anydata...; |} movieItem) {
-            Movie movie = mapToMovie(movieItem);
-            movieList.push(movie);
+            Item item = mapToMovie(movieItem);
+            movieList.push(item);
         });
         if forEach is error {
             return forEach;
@@ -45,11 +49,15 @@ service /movies on new http:Listener(8080) {
 }
 
 // Function to map the BSON record to Movie type
-function mapToMovie(record {| anydata...; |} movieItem) returns Movie {
+function mapToMovie(record {| anydata...; |} listItem) returns Item {
     return {
-        title: <string> movieItem["title"],
-        year: <int> movieItem["year"],
-        genre: <string> movieItem["genre"],
-        director: <string> movieItem["director"]
+        title: <string> listItem["title"],
+        genre: <string> listItem["genre"],
+        desc: <string> listItem["desc"],
+        seller: <string> listItem["seller"],
+        thumb: <string> listItem["thumb"],
+        img: <string> listItem["img"],
+        price: <int> listItem["price"],
+        location: <string> listItem["location"]
     };
 }
