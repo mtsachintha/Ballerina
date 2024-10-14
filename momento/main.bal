@@ -21,7 +21,7 @@ mongodb:ConnectionConfig mongoConfig = {
 mongodb:Client mongoDb = check new (mongoConfig);
 
 // Define the service
-service /movies on new http:Listener(8080) {
+service /collectibles on new http:Listener(8080) {
 
     // Resource to handle GET requests
     resource function get .() returns Item[]|error {
